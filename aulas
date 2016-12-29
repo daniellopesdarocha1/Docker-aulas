@@ -1,0 +1,109 @@
+aula 01
+
+sudo doker pull mysql
+
+sudo docker run --name database_alura -e MYSQL_ROOT_PASSWORD=test123 -d mysql
+
+sudo docker ps
+
+sudo docker run --name blogAlura --link database_alura:mysql -e WORDPRESS_DB_PASSWORD=test123 -p 81:80 -d wordpress
+
+
+aula 02
+
+sudo docker exec -i -t blogAlura bash
+
+sudo docker rm (para container em uso)
+
+
+aula 03
+
+ sudo docker run -it ubuntu bash
+
+sudo docker exec -it 6f3e0aed1636 ps aux
+
+sudo docker rm `sudo docker ps -qa`
+   //para apagar todos os containers em backgroud
+
+sudo docker run --rm -it ubuntu bash
+   //esse --rm descarta o container assim que sair dele (para containers nao persistentes)
+
+
+aula 04
+
+sudo docker run -it ubuntu bash
+
+apt-get update && apt-get install -y apache2
+
+ctrl+p+q
+
+sudo docker commit -m "instalação do apache" naugthy_nobel ubuntu/apache
+
+sudo docker run -it -p 82:80 ubuntu/apache bash
+
+
+aula 05
+
+Dockerfile
+    FROM ubuntu
+    RUN apt-get update && apt-get install -y apache2
+
+sudo docker build -t ubuntu/apache .
+
+sudo docker run -d -p 83:80 ubuntu/apache
+
+/*A principal diferença entre o comando ADD e o comando COPY
+é que o ADD faz algumas coisas a mais como por exemplo
+aceitar arquivos comprimidos (.zip) e na hora de adicionar
+ele vai realizar a descompactação sozinho alem de permitir
+que o caminho do arquivo seja uma URL.*/
+
+
+aula 06
+
+docker-compose.yml
+    db:
+      image: mysql
+      environment:
+        - MYSQL_ROOT_PASSWORD=test123
+
+    blog:
+      image: wordpress
+      links:
+        - db
+      ports:
+        - 84:80
+
+sudo docker-compose up
+
+sudo docker-compose up -d
+    //-d não mostra a tela de logs
+
+sudo docker run --rm --link database_alura:db -it ubuntu bash
+
+ping db
+
+
+aula 07
+
+sudo docker run -it -v $(pwd):/tmp ubuntu /bin/bash
+    /para guardar os dados criados dentro do container
+
+docker-compose.yml
+db:
+  image: mysql
+  volumes:
+    - /home/daniel/Documents/_DevOps/Docker/alura/blog_alura/database/:/var/lib/mysql/
+  environment:
+    - MYSQL_ROOT_PASSWORD=test123
+
+blog:
+  image: wordpress
+  environment:
+  - WORDPRESS_DB_PASSWORD=test123
+  links:
+    - db:mysql
+  ports:
+    - 84:80
+
+sudo docker-compose up -d
