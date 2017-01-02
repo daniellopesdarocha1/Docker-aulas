@@ -107,3 +107,277 @@ blog:
     - 84:80
 
 sudo docker-compose up -d
+
+
+################################################
+                Aulas Linux Tips
+################################################
+
+sudo docker run -i -t ubuntu /bin/bash
+    /*entra na imagem ubuntu e executa o /bin/bash*/
+
+
+ps -ef
+   /*para visualizar os processos que estão rodando*/
+
+
+ctrl p q
+   /*sai do docker sem matar os processos da maquina*/
+
+
+sudo docker ps
+   /*para pegar o container id*/
+
+
+sudo docker attach f4e638cb6ea0
+   /*entra novamente na maquina que sai*/
+
+
+sudo docker diff 396d8598b98d
+   /*visualizar modificações*/
+
+
+sudo docker run -i -t -p 8080:80 ubuntu /bin/bash
+   /*8080 é a porta fisica 80 é a do docker*/
+
+
+apt-get install ngnix
+
+
+apt-get install net-tools
+
+
+netstat -atunp
+
+
+sudo docker diff 396d8598b98d
+
+
+sudo docker commit 3a9c3133f3dd daniel/nginx-ubuntu:1.0
+    /*para criar a minha imagem do ubuntu com a instalação do nginx, é importante passar um nome para a imagem e a versão */
+
+
+sudo docker ps
+sudo docker images
+
+
+sudo docker run -i -t -p 6660:80 daniel/nginx-ubuntu:1.0 /bin/bash
+    /*para rodar a maquina em outra porta da maquina fisica*/
+
+
+sudo docker attach 3a9c3133f3dd
+
+
+tail -f /var/log/nginx/access.log
+    /*mostra os log dentro da maquina do docker quando eu acesso pela maquina fisica o endereco ip:3000*/
+
+
+sudo docker stop 3a9c3133f3dd
+    /*para stopar o container, ele não some da maquina*/
+
+
+--
+
+sudo docker run -ti -p 3000:80 daniel/nginx-ubuntu:1.0 /bin/bash
+
+/etc/init.d/nginx start
+
+sudo docker exec 0aeb502523b0 ps -ef
+sudo docker exec 0aeb502523b0 /etc/init.d/nginx stop
+sudo docker exec 0aeb502523b0 /etc/init.d/nginx start
+    /*para executar comandos dentro do container*/
+
+
+sudo docker inspect 0aeb502523b0
+    /*visualizar informações como ip do container, portas, data de criacao, etc...*/
+
+
+curl 172.17.0.16:80
+    /*visualiza o codigo da pagina do nginx no bash*/
+
+
+sudo docker stats 0aeb502523b0
+    /*verifica o quanto o container esta consumindo de memoria, cpu e rede*/
+
+
+sudo docker stop 0aeb502523b0
+
+
+sudo docker start 0aeb502523b0
+
+
+sudo docker rm 0aeb502523b0
+    /*não remove se o container estiver em execução*/
+
+
+sudo docker rm -f 0aeb502523b0
+    /*remove o container mesmo se estiver em execução*/
+
+
+sudo docker rmi -f 7a301704fe75
+    /*para remover a imagem do container*/
+
+sudo docker run -it --name web2 --link romantic_hodgkin:web1 daniel/nginx-ubuntu:1.0
+    /*para fazer uma maquina docker conversar com outra*/
+
+ /etc/init.d/nginx start
+
+ ping web1
+
+
+--
+
+Dockerfiles
+
+
+~/
+
+mkdir Dockerfile
+
+cd Dockerfile
+
+mkdir apache
+
+cd apache
+
+vim Dockerfile
+
+    From ubuntu:14.04
+    MAINTAINER daniellopesdarocha1@gmail.com
+    RUN apt-get update && apt-get install -y apache2 && apt-get clean
+
+sudo docker build .
+
+sudo docker images
+
+sudo docker build -t linuxtips/apache:1.0 .
+   /*para dar um nome para a imagem que foi criada*/
+
+sudo docker images
+
+sudo docker run -it linuxtips/apache:1.0 /bin/bash
+
+ps -ef
+    /*o apache ainda não esta rodando*/
+
+/etc/init.d/apache2 start
+
+ps -ef
+
+netstat -atunp
+
+ifconfig
+    /*para pegar o ip do container, entao sai do container ctrl+p+q*/
+
+curl 10.0.0.4
+    /*se trazer o codigo da pagina do apache é porque funcionou*/
+
+
+--
+
+
+/*configurando cpu, memoria e utilizando docker update*/
+
+sudo docker run -ti debian /bin/bash
+    /*subindo um container debian sem limite algum*/
+
+free -m
+    /*traz a quantidade de memoria total do host*/
+
+ctrl+p+q
+
+sudo docker inspect 01a0913f9cd9 | grep -i mem
+    /*para ver as variaveis onde estao setadas variaveis de memoria*/
+
+sudo docker run -ti -m 512M debian /bin/bash
+    /*definindo a quantidade de memoria para o container*/
+
+free -m
+
+sudo docker ps
+
+sudo docker inspect fcdf4a4788aa | grep -i mem
+
+bc
+
+536870912/1024/1024
+    /*512*/
+
+
+sudo docker run -it --cpu-shares 1024 debian /bin/bash
+sudo docker run -ti --cpu-shares 512 debian /bin/bash
+sudo docker run -ti --cpu-shares 512 debian /bin/bash
+    /*subindo 3 maquinas 50%, 25%, 25%*/
+
+
+sudo docker inspect 16b1b072b4d2 | grep -i cpu
+sudo docker inspect bf2a3c300f84 | grep -i cpu
+sudo docker inspect 0a5bb760e14e | grep -i cpu
+
+
+curl -fsSL https://get.docker.com/ | sh
+    /*com o docker update, na versão superior a 1.10 do docker, da para atualizar memoria e cpu sem parar o container*/
+
+
+sudo docker update --help
+
+docker ps
+
+sudo docker update --cpu-shares 512 16b1b072b4d2
+
+sudo docker inspect 16b1b072b4d2 | grep -i cpu
+
+docker update --help
+
+
+--
+
+
+mkdir dockerfiles
+
+cd dockerfiles
+
+mkdir apache
+
+cd apache
+
+vim Dockerfile
+  FROM debian
+  RUN apt-get update && apt-get install apache2 -y && apt-get clean
+  ENV APACHE_LOCK_DIR="/var/lock"
+  ENV APACHE_PID_FILE="/var/run/apache2.pid"
+  ENV APACHE_RUN_USER="www-data"
+  ENV APACHE_RUN_GROUP="www-data"
+  ENV APACHE_LOG_DIR="/var/log/apache2"
+
+  LABEL Description="Webserver"
+
+  VOLUME /var/www/html
+
+  EXPOSE 80
+
+
+
+sudo docker build -t webserver:1.0 .
+
+sudo docker images
+
+sudo docker run -ti webserver:1.0
+
+ps -ef
+
+/etc/init.d/apache2 start
+
+ps -ef
+
+ss -s
+
+ss -a
+
+ap addr
+
+ctrl+p+q
+
+telnet 172.17.0.2 80
+ou
+curl 172.17.0.2:80
