@@ -1,0 +1,125 @@
+Docker #1
+
+curl -sSl https://get.docker.com | sh
+
+/etc/init.d/docker start
+
+ps -ef | grep docker
+
+docker ps
+
+docker images
+
+docker run -i -t ubuntu:14.10 /bin/bash
+
+/*estamos em outra máquina*/
+
+uname -a 
+
+cat /etc/issue
+
+//apenas um processo esta sendo executado
+
+ps -ef
+
+//para sair do container 
+
+ctrl+d mata o container
+
+ctrl+p+q sai do container, porém deixa ele ativo
+// o container continua rodando
+
+docker ps
+
+//para voltar para o container
+
+docker attach 0816e23627ba
+
+ctrl+p+q
+
+docker ps
+
+//verificar o que fez de alteracao do momento que criou o container até quando saiu dele
+//mostra arquivos criados, deletados ou modificados
+
+docker diff 0816e23627ba
+
+
+docker ps 
+
+//pega o container id
+
+docker attach 0816e23627ba
+
+//para fazer o logout
+ctrl+d 
+
+docker ps
+
+//criando um container, install ngx e exibir uma pagina mostrando que esta funcionando de dentro do container
+
+docker run -i -t -p 8080:80 ubuntu:14.10 /bin/bash
+
+cat /etc/issue
+
+//8080 é a porta fisica
+//80 é a porta do container
+
+apt-get update
+
+apt-get install nginx
+
+ps -ef
+
+/etc/init.d/nginx start
+
+ps -ef
+
+netstat -atunp
+
+ctrl+p+q
+
+docker ps
+
+//no navegador
+
+localhost:8080
+
+docker diff 0816e23627ba
+
+//se fechar o container agora (ctrl+p+q ou exit) todas as modificações serão perdidas, 
+	//por isto vamos commitar esta imagem do docker
+
+//docker commit containerID nomeDaImagem
+docker commit 0816e23627ba badtux/nginx-ubuntu:1.0
+
+//para visualizar todas as imagens que temos
+
+docker image
+
+--#-------------------------------------
+
+//subindo outro contaier
+
+docker images
+
+docker run -i -t -p 8083:80 badtux/nginx-ubuntu:1.0 /bin/bash
+
+cat /etc/issue
+
+/etc/init.d/nginx start
+
+ps -ef
+
+ctrl+p+q
+
+localhost:8083
+
+//entrar no primeiro container
+
+docker attach 0816e23627ba
+
+tail -f /var/log/nginx/access.log
+
+docker stop 0816e23627ba
+
